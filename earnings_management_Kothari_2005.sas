@@ -49,7 +49,7 @@ if sale > 0 and at > 0;
 if ib =. then ib=ibc;
 run;
 
-/* Lagged values for: at sale rect invt roa */
+/* Lagged values for: at sale rect */
 %let lagVars = at sale rect;
 
 /* Self join to get lagged values at_l, sale_l, rect_l */
@@ -80,8 +80,8 @@ run;
 %let winsVars = tac inv_at_l rev drev drevadj ppe roa  ; 
 %winsor(dsetin=da.b_funda, dsetout=da.b_funda_wins, /*byvar=, */ vars=&winsVars, type=winsor, pctl=1 99);
 
-/* Regression by industry-year -- added edf for degrees of freemdom 
- edf + #params (4) will equal the number of obs (no need for proc univariate to count) */
+/* Regression by industry-year -- edf outputs degrees of freemdom 
+ edf + #params (5) will equal the number of obs (no need for proc univariate to count) */
 proc sort data=da.b_funda_wins; by fyear sic2;run;
 proc reg data=da.b_funda_wins noprint edf outest=da.c_parms;
 model tac = inv_at_l drevadj ppe roa;      
