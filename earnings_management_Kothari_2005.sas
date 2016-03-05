@@ -26,7 +26,7 @@
 */
 
 /* Assign directory for output */
-%let projectDir = F:/temp;
+%let projectDir = F:/temp/;
 
 /* Include %array and %do_over */
 filename m1 url 'https://gist.github.com/JoostImpink/c22197c93ecd27bbf7ef';
