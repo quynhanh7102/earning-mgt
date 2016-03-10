@@ -29,7 +29,7 @@
 %let projectDir = F:/temp/;
 
 /* Include %array and %do_over */
-filename m1 url 'https://gist.github.com/JoostImpink/c22197c93ecd27bbf7ef';
+filename m1 url 'https://gist.githubusercontent.com/JoostImpink/c22197c93ecd27bbf7ef/raw/2e2a54825c9dbfdfd66cfc94b9abe05e9d1f1a8e/array.sas';
 %include m1;
 
 /* Winsorize macro */
