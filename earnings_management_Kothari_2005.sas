@@ -49,8 +49,8 @@ if sale > 0 and at > 0;
 if ib =. then ib=ibc;
 run;
 
-/* Lagged values for: at sale rect */
-%let lagVars = at sale rect;
+/* Lagged values for: at sale rect invt ib */
+%let lagVars = at sale rect ib;
 
 /* Self join to get lagged values at_l, sale_l, rect_l */
 proc sql;
@@ -69,22 +69,22 @@ tac        = (ib - oancf)/at_l;  /* alternative: tac        = (ib-oancf+xidoc)/a
 inv_at_l  = 1 / at_l;
 rev       = sale / at_l;
 drev      = (sale - sale_l) / at_l;
-drevadj   = ( (sale - sale_l) - (rect - rect_l) )/at_l;
+drevadj   = (sale - sale_l)/at_l - (rect - rect_l)/at_l;
 ppe       = ppegt / at_l;
-roa = ib/ at; /* net income before extraordinary items */
+roa_l = ib_l/ at_l; /* net income before extraordinary items */
 /* these variables may not be missing (cmiss counts missing variables)*/
-if cmiss  (of tac inv_at_l drevadj ppe roa) eq 0;
+if cmiss  (of tac inv_at_l drevadj ppe roa_l) eq 0;
 run;
 
 /* Winsorize  */
-%let winsVars = tac inv_at_l rev drev drevadj ppe roa  ; 
+%let winsVars = tac inv_at_l rev drev drevadj ppe roa_l  ; 
 %winsor(dsetin=da.b_funda, dsetout=da.b_funda_wins, /*byvar=, */ vars=&winsVars, type=winsor, pctl=1 99);
 
-/* Regression by industry-year -- edf outputs degrees of freemdom 
- edf + #params (5) will equal the number of obs (no need for proc univariate to count) */
+/* Regression by industry-year -- added edf for degrees of freemdom 
+ edf + #params (4) will equal the number of obs (no need for proc univariate to count) */
 proc sort data=da.b_funda_wins; by fyear sic2;run;
 proc reg data=da.b_funda_wins noprint edf outest=da.c_parms;
-model tac = inv_at_l drevadj ppe roa;      
+model tac = inv_at_l drevadj ppe roa_l;      
 by fyear sic2;
 run;
 
@@ -92,7 +92,7 @@ run;
 proc sql;
  create table da.d_model1 as 
  /* fitted value computed as sum of coefficients in b multiplied by values in a */
- select a.*, b.intercept + %do_over(values=inv_at_l drevadj ppe roa, between=%str(+), phrase=a.? * b.?) as fitted,
+ select a.*, b.intercept + %do_over(values=inv_at_l drevadj ppe roa_l, between=%str(+), phrase=a.? * b.?) as fitted,
  /* abnormal accruals are ta - fitted */
  a.tac - calculated fitted as DA, 
  /* absolute abnormal accruals */
@@ -103,11 +103,15 @@ proc sql;
  and b._EDF_ > 5 ;
 quit;
 
+/* Winsorize DA ABSDA  */
+%let winsVars = DA ABSDA   ; 
+%winsor(dsetin=da.d_model1, dsetout=da.d_model1_wins, /*byvar=, */ vars=&winsVars, type=winsor, pctl=1 99);
+
 /* Means, medians for key variables and DA, ABSDA */
-proc means data=da.d_model1 n mean median ;
-var tac inv_at_l drevadj ppe roa DA ABSDA ;
+proc means data=da.d_model1_wins n mean median ;
+var tac inv_at_l drevadj ppe roa_l DA ABSDA ;
 run; 
 
 /*	Output dataset  */
-proc export data = da.d_model1  (keep = gvkey fyear datadate sich tac inv_at_l drevadj ppe roa DA ABSDA) 
+proc export data = da.d_model1_wins  (keep = gvkey fyear datadate sich tac inv_at_l drevadj ppe roa DA ABSDA) 
 outfile = "&projectDir.stata/from sas/absda.dta" replace; run;
