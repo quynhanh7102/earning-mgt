@@ -10,7 +10,7 @@
 	chSales:	Change in net sales revenue
 	chREC: 		Change in net receivables
 	PPE:		Gross property, plant, and equipment
-	ROA:		Return on assets. 
+	ROA:		Return on assets previous period. 
 
 	All variables are scaled by beginning of year total assets (except ROA) to control for 
 	heteroscedasticity.
@@ -31,6 +31,10 @@
 /* Include %array and %do_over */
 filename m1 url 'https://gist.github.com/JoostImpink/c22197c93ecd27bbf7ef';
 %include m1;
+
+/* Winsorize macro */
+filename m2 url 'https://gist.githubusercontent.com/JoostImpink/497d4852c49d26f164f5/raw/11efba42a13f24f67b5f037e884f4960560a2166/winsorize.sas';
+%include m2;
 
 /* Get Funda variables */
 %let fundaVars = at ib ibc oancf ppegt rect sale ;
