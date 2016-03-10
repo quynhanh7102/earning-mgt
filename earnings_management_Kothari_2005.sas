@@ -113,5 +113,5 @@ var tac inv_at_l drevadj ppe roa_l DA ABSDA ;
 run; 
 
 /*	Output dataset  */
-proc export data = da.d_model1_wins  (keep = gvkey fyear datadate sich tac inv_at_l drevadj ppe roa DA ABSDA) 
+proc export data = da.d_model1_wins  (keep = gvkey fyear datadate sich tac inv_at_l drevadj ppe roa_l DA ABSDA) 
 outfile = "&projectDir.stata/from sas/absda.dta" replace; run;
