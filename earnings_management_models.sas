@@ -170,6 +170,9 @@ proc sql;
 		having Difference = min(Difference); /* keep best match for size difference */		
 quit;
 
+/* drop possible multiple matches (with the same difference) in previous step */
+proc sort data=da.d_model4 nodupkey; by key;run;
+
 /* Winsorize discretionary accrual variables  */
 %let winsVars = DA_Jones DA_mJones DA_Kothari DA_pmKothari ABSDA_Jones  ABSDA_mJones  ABSDA_Kothari ABSDA_pmKothari  ; 
 %winsor(dsetin=da.d_model4, dsetout=da.e_wins, /*byvar=, */ vars=&winsVars, type=winsor, pctl=1 99);
